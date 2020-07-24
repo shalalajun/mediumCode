@@ -1,0 +1,56 @@
+    Shader "Kyo/URP_bareBone_Texture"
+    {
+        Properties
+        {
+    
+            _Color("Color", color) = (1,1,1,1)
+            _MainTex("Texture", 2D) = "white" {}
+
+        }
+        SubShader
+        {
+            Tags {"RenderPipeline"="UniversalRenderPipeline" "RenderType"="Opaque" "Queue"="Geometry"}
+            LOD 300
+
+            Pass
+            {
+                HLSLPROGRAM
+        
+                #pragma vertex vert
+                #pragma fragment frag
+                #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+            
+                float4 _Color;
+                sampler2D _MainTex;
+                float4 _MainTex_ST;
+
+                struct vertexInput
+                {
+                float4 vertex : POSITION;
+                float2 uv     : TEXCOORD0; 
+                };
+
+                struct vertexOutput
+                {
+                float4 vertex      : SV_POSITION;
+                float2 uv          : TEXCOORD0;
+                };
+
+
+                vertexOutput vert (vertexInput v)
+                {
+                vertexOutput o;
+                o.vertex = TransformObjectToHClip(v.vertex.xyz);
+                o.uv = v.uv.xy * _MainTex_ST.xy + _MainTex_ST.zw;     
+                return o;
+                }
+
+                float4 frag (vertexOutput i) : SV_Target
+                {
+                    float4 col = tex2D(_MainTex, i.uv) * _Color;
+                    return col;
+                }
+                ENDHLSL
+            }
+        }
+    }
